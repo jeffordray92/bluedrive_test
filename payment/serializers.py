@@ -2,7 +2,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework import serializers, permissions
 
 from payment.models import Currency, Payment
-
+from user.serializers import PaymentUserSerializer
 
 class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,19 +14,23 @@ class CurrencySerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
-
-    username = serializers.CharField(source='user.username')
-    currency_code = serializers.CharField(source='currency.code')
+    currency = CurrencySerializer()
+    user = PaymentUserSerializer()
 
     class Meta:
         model = Payment
         fields = [
             'user',
-            'username',
             'reference_code',
             'amount',
-            'currency_code',
+            'currency',
             'is_paid',
             'paid_date',
             'created_date'
         ]
+
+
+class CreatePaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'

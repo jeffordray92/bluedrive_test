@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 optional = {
     'blank': True,
@@ -15,7 +16,7 @@ def generate_ref_code(digits):
 class Currency(models.Model):
     name = models.CharField(max_length=30)
     code = models.CharField(max_length=3, unique=True, **optional) # TODO: ADD UNIQUE
-    created_date = models.DateField(auto_now=False, auto_now_add=False)
+    created_date = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now)
 
     def save(self, *args, **kwargs):
         code = generate_ref_code(3)
@@ -30,7 +31,7 @@ class Payment(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     is_paid = models.BooleanField(default=False)
     paid_date = models.DateField(**optional)
-    created_date = models.DateField(auto_now=False, auto_now_add=False)
+    created_date = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now)
 
     def save(self, *args, **kwargs):
         code = generate_ref_code(10)
