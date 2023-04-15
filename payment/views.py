@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 
 from payment.models import Currency, Payment
-from payment.serializers import PaymentSerializer
+from payment.serializers import CurrencySerializer, PaymentSerializer
 
 
 class PaymentList(generics.ListCreateAPIView):
@@ -20,3 +20,7 @@ class PaymentList(generics.ListCreateAPIView):
         if currency is not None:
             queryset = queryset.filter(currency__code=currency)
         return queryset
+
+class CurrencyList(generics.ListAPIView):
+    queryset = Currency.objects.all()
+    serializer_class = CurrencySerializer

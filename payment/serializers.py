@@ -4,13 +4,13 @@ from rest_framework import serializers, permissions
 from payment.models import Currency, Payment
 
 
-# class CurrencySerializer(serializers.Serializer):
-#     class Meta:
-#         model = Currency
-#         fields = [
-#             'name',
-#             'code'
-#         ]
+class CurrencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = [
+            'name',
+            'code'
+        ]
 
 
 class PaymentSerializer(serializers.ModelSerializer):

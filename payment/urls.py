@@ -4,6 +4,7 @@ from payment import views
 
 urlpatterns = [
     path('', views.PaymentList.as_view()),
+    path('currency/', views.CurrencyList.as_view())
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
