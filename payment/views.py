@@ -1,6 +1,7 @@
 from django.http import Http404, QueryDict
 
 from rest_framework.views import APIView
+from rest_framework.exceptions import ParseError, PermissionDenied
 from rest_framework.response import Response
 from rest_framework import generics, status
 
@@ -26,13 +27,23 @@ class PaymentList(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
 
-        data = QueryDict('', mutable=True)
-        data.update(request.data)
-        data.update(user=request.user.id, currency=Currency.objects.get(code=data.get("currency")).id)
+        try:
+            data = QueryDict('', mutable=True)
+            data.update(request.data)
+            data.update(user=request.user.id, currency=Currency.objects.get(code=data.get("currency")).id)
 
-        serializer = CreatePaymentSerializer(data=data)
+            serializer = CreatePaymentSerializer(data=data)
+        except Exception as e:
+            raise ParseError(e)
 
         serializer.is_valid(raise_exception=True)
+
+        # ADD FUNCTION TO CHECK FOR OVERDRAFT
+        is_payment_beyond_limit = serializer.is_payment_beyond_limit(self.request)
+        if is_payment_beyond_limit is not None:
+            raise PermissionDenied(detail=is_payment_beyond_limit.get('detail'))
+
+
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
