@@ -16,12 +16,15 @@ def generate_ref_code(digits):
 class Currency(models.Model):
     name = models.CharField(max_length=30)
     code = models.CharField(max_length=3, unique=True, **optional) # TODO: ADD UNIQUE
-    created_date = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now)
+    created_date = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
 
     def save(self, *args, **kwargs):
         code = generate_ref_code(3)
         self.reference_code = code
         super(Payment, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.code)
 
 
 class Payment(models.Model):
@@ -31,11 +34,18 @@ class Payment(models.Model):
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
     is_paid = models.BooleanField(default=False)
     paid_date = models.DateField(**optional)
-    created_date = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now)
+    created_date = models.DateTimeField(auto_now=False, auto_now_add=False, default=timezone.now)
 
     def save(self, *args, **kwargs):
         code = generate_ref_code(10)
         self.reference_code = code
         super(Payment, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return "{} {} by {} ({})".format(
+            self.amount,
+            self.currency.code,
+            self.user.username,
+            self.created_date
+        )
 
