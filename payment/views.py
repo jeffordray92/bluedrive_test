@@ -12,4 +12,11 @@ class PaymentList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Payment.objects.filter(user=user)
+        reference = self.request.query_params.get('reference')
+        currency = self.request.query_params.get('currency')
+        queryset = Payment.objects.filter(user=user)
+        if reference is not None:
+            queryset = queryset.filter(reference_code=reference)
+        if currency is not None:
+            queryset = queryset.filter(currency__code=currency)
+        return queryset
