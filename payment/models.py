@@ -36,9 +36,17 @@ class Payment(models.Model):
     paid_date = models.DateField(**optional)
     created_date = models.DateField(auto_now=False, auto_now_add=False, default=timezone.now().date())
 
+    def __init__(self, *args, **kwargs):
+        super(Payment, self).__init__(*args, **kwargs)
+        self._is_paid = self.is_paid
+        self._reference_code = self.reference_code
+
     def save(self, *args, **kwargs):
-        code = generate_ref_code(10)
-        self.reference_code = code
+        if not self._is_paid and self.is_paid:
+            self.paid_date = timezone.now().date()
+        if not self._reference_code:
+            code = generate_ref_code(10)
+            self.reference_code = code
         super(Payment, self).save(*args, **kwargs)
 
     def __str__(self):

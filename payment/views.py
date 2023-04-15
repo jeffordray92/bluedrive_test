@@ -34,15 +34,14 @@ class PaymentList(generics.ListCreateAPIView):
 
             serializer = CreatePaymentSerializer(data=data)
         except Exception as e:
-            raise ParseError(e)
+            raise ParseError("Invalid Currency code")
 
         serializer.is_valid(raise_exception=True)
 
-        # ADD FUNCTION TO CHECK FOR OVERDRAFT
+        # FUNCTION TO CHECK FOR OVERDRAFT
         is_payment_beyond_limit = serializer.is_payment_beyond_limit(self.request)
         if is_payment_beyond_limit is not None:
             raise PermissionDenied(detail=is_payment_beyond_limit.get('detail'))
-
 
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -52,3 +51,24 @@ class PaymentList(generics.ListCreateAPIView):
 class CurrencyList(generics.ListAPIView):
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
+
+
+class ConfirmPayment(APIView):
+    """
+    """
+
+    def post(self, request, format=None):
+        try:
+            reference_code = request.data.get('reference_code')
+            payment = Payment.objects.get(reference_code=reference_code)
+        except Exception as e:
+            raise ParseError("Invalid reference code")
+
+        if payment.is_paid:
+            raise PermissionDenied(detail="Transaction has already been paid")
+        else:
+            payment.is_paid = True
+            payment.save()
+
+            serializer = PaymentSerializer(payment)
+            return Response(serializer.data)
