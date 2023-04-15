@@ -8,5 +8,8 @@ from payment.serializers import PaymentSerializer
 
 
 class PaymentList(generics.ListCreateAPIView):
-    queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Payment.objects.filter(user=user)
