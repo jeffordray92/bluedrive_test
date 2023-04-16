@@ -1,4 +1,5 @@
 from django.http import Http404, QueryDict
+from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.exceptions import ParseError, PermissionDenied
@@ -46,6 +47,23 @@ class PaymentList(generics.ListCreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class PaymentDetail(generics.RetrieveAPIView):
+    serializer_class = PaymentSerializer
+    queryset = Payment.objects.all()
+    lookup_field = 'reference_code'
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        filter = {
+            self.lookup_field: self.kwargs[self.lookup_field],
+            'user': self.request.user.id
+        }
+
+        obj = get_object_or_404(queryset, **filter)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
 class CurrencyList(generics.ListAPIView):

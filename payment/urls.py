@@ -4,6 +4,7 @@ from payment import views
 
 urlpatterns = [
     path('', views.PaymentList.as_view()),
+    path('<str:reference_code>/', views.PaymentDetail.as_view()),
     path('currency/', views.CurrencyList.as_view()),
     path('pay/', views.ConfirmPayment.as_view())
 ]
