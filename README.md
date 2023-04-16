@@ -6,7 +6,6 @@
 
 ```bash
 python3 -m venv env && source env/bin/activate                # activate venv
-cp .env.dist .env                                             # create .env file and fill-in DB info
 pip install -r requirements.txt                               # install py requirements
 ./manage.py migrate                                           # run migrations
 ```
