@@ -12,6 +12,9 @@ from user.serializers import PaymentUserSerializer
 
 
 class PaymentList(generics.ListCreateAPIView):
+    """
+    Views to return list of payment (GET) and add new payment [POST]
+    """
     serializer_class = PaymentSerializer
 
     def get_queryset(self):
@@ -35,11 +38,11 @@ class PaymentList(generics.ListCreateAPIView):
 
             serializer = CreatePaymentSerializer(data=data)
         except Exception as e:
-            raise ParseError("Invalid Currency code")
+            raise ParseError(e)
 
         serializer.is_valid(raise_exception=True)
 
-        # FUNCTION TO CHECK FOR OVERDRAFT
+        # Check for overdraft
         is_payment_beyond_limit = serializer.is_payment_beyond_limit(self.request)
         if is_payment_beyond_limit is not None:
             raise PermissionDenied(detail=is_payment_beyond_limit.get('detail'))
@@ -50,6 +53,9 @@ class PaymentList(generics.ListCreateAPIView):
 
 
 class PaymentDetail(generics.RetrieveAPIView):
+    """
+    View to get single payment detail
+    """
     serializer_class = PaymentSerializer
     queryset = Payment.objects.all()
     lookup_field = 'reference_code'
@@ -67,12 +73,16 @@ class PaymentDetail(generics.RetrieveAPIView):
 
 
 class CurrencyList(generics.ListAPIView):
+    """
+    View to return list of currencies
+    """
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
 
 
 class ConfirmPayment(APIView):
     """
+    View to confirm (pay) payment
     """
 
     def post(self, request, format=None):
